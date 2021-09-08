@@ -1,5 +1,4 @@
 import { GraphQLServer } from "graphql-yoga";
-import { v4 as uuidv4 } from "uuid";
 // ... or using `require()`
 // const { GraphQLServer } = require('graphql-yoga')
 
@@ -82,12 +81,6 @@ const typeDefs = `
     comments: [Comment!]!
   }
 
-  type Mutation {
-    createUser(name: String!, email: String!, age: Int!): User!
-    createPost(title: String!, body: String!, published: Boolean, author: ID!): Post!
-    createComment(title: String, author: ID!, post: ID!): Comment!
-  }
-
   type User {
       id: ID!,
       name: String,
@@ -158,62 +151,6 @@ const resolvers = {
 
     comments: () => {
       return comments;
-    },
-  },
-  Mutation: {
-    createUser(parent, args, ctx, info) {
-      const emailTaken = arr.some((user) => user.email === args.email);
-      if (emailTaken) {
-        throw new Error("Email taken");
-      }
-
-      const user = {
-        id: uuidv4(),
-        name: args.name,
-        email: args.email,
-        age: args.age,
-      };
-
-      arr.push(user);
-      return user;
-      console.log("args", args);
-    },
-    createPost(parent, args, ctx, info) {
-      const userExists = arr.some((user) => user.id === args.author);
-      if (!userExists) {
-        throw new Error("User not found");
-      }
-
-      const post = {
-        id: uuidv4(),
-        title: args.title,
-        body: args.body,
-        published: args.published,
-        author: args.author,
-      };
-
-      postArr.push(post);
-      return post;
-    },
-    createComment(parent, args, ctx, info) {
-      const userExists = arr.some((user) => user.id === args.author);
-      const postExists = postArr.some((post) => post.id === args.post);
-      if (!postExists) {
-        throw new Error("Post not found");
-      }
-      if (!userExists) {
-        throw new Error("user not found");
-      }
-
-      const comment = {
-        id: uuidv4(),
-        title: args.title,
-        author: args.autho,
-        post: args.post,
-      };
-
-      comments.push(comment);
-      return comment;
     },
   },
   Post: {
