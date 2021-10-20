@@ -94,7 +94,7 @@ const Mutation = {
     return deletedComments[0];
   },
 
-  createPost(parent, args, { db }, info) {
+  createPost(parent, args, { db, pubsub }, info) {
     const userExists = db.arr.some((user) => user.id === args.data.author);
     if (!userExists) {
       throw new Error("User not found");
@@ -106,6 +106,11 @@ const Mutation = {
     };
 
     db.postArr.push(post);
+
+    if (args.data.published) {
+      pubsub.publish("post", { post });
+    }
+
     return post;
   },
 
@@ -132,7 +137,7 @@ const Mutation = {
     return post;
   },
 
-  createComment(parent, args, { db }, info) {
+  createComment(parent, args, { db, pubsub }, info) {
     const userExists = db.arr.some((user) => user.id === args.data.author);
     const postExists = db.postArr.some((post) => post.id === args.data.post);
     if (!postExists) {
@@ -148,6 +153,9 @@ const Mutation = {
     };
 
     db.comments.push(comment);
+
+    pubsub.publish(`comment ${args.data.post}`, { comment: comment });
+
     return comment;
   },
 };
